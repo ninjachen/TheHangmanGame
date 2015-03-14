@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TheHangmanGame</string>
+    <string name="guess_it">Guess it!</string>
+    <string name="start_a_new_game">Start a new game!</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
 </resources>

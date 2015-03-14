@@ -1,19 +1,50 @@
 package ninjachen.me.thehangmangame;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 
 public class MainActivity extends ActionBarActivity {
+    @InjectView(R.id.score)
+    TextView score;
+
+    @InjectView(R.id.currentWord)
+    TextView currentWord;
+
+    @InjectView(R.id.guessLetter)
+    EditText guessLetter;
+
+    @InjectView(R.id.start)
+    Button start;
+
+    @InjectView(R.id.guess)
+    Button guess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
+
     }
 
+public class StartGameTask extends AsyncTask<Void, Void,Void>{
+
+    @Override
+    protected Void doInBackground(Void... params) {
+        return null;
+    }
+}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
