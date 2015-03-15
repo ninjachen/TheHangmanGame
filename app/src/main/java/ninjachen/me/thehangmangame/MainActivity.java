@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,9 @@ public class MainActivity extends ActionBarActivity {
     @InjectView(R.id.wrongGuessCountOfCurrentWord)
     TextView wrongGuessCountOfCurrentWordTV;
 
+    @InjectView(R.id.nummberOfGuessAllowedForEachWord)
+    TextView nummberOfGuessAllowedForEachWordTv;
+
     @InjectView(R.id.guessLetter)
     EditText guessLetterET;
 
@@ -47,6 +51,9 @@ public class MainActivity extends ActionBarActivity {
 
     @InjectView(R.id.submitScore)
     Button submitScoreBTN;
+
+    @InjectView(R.id.image)
+    ImageView imageView;
 
     HangManGame hangManGame;
 
@@ -120,13 +127,13 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.menuStartGame) {
             startNewGame();
             return true;
-        }else if(id == R.id.menuNextWord){
+        } else if (id == R.id.menuNextWord) {
             nextWord();
             return true;
-        }else if(id == R.id.menuGetMyScore){
+        } else if (id == R.id.menuGetMyScore) {
             getScore();
             return true;
-        }else if(id == R.id.menuSubmitScore){
+        } else if (id == R.id.menuSubmitScore) {
             submitScore();
             return true;
         }
@@ -164,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
             super.onPostExecute(result);
             if (result == null)
                 Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
-
+            nummberOfGuessAllowedForEachWordTv.setText(String.valueOf(hangManGame.NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD));
             currentWordTV.setText(hangManGame.getWord());
             wrongGuessCountOfCurrentWordTV.setText(String.valueOf(hangManGame.getWrongGuessCountOfCurrentWord()));
         }
@@ -227,7 +234,7 @@ public class MainActivity extends ActionBarActivity {
                 Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
                 Log.e(TAG, getString(R.string.server_error_message));
             } else {
-                scoreTV.setText(hangManGame.getScore());
+                scoreTV.setText(String.valueOf(hangManGame.getScore()));
             }
         }
     }
@@ -254,6 +261,7 @@ public class MainActivity extends ActionBarActivity {
     private void clearWord() {
         currentWordTV.setText("");
         wrongGuessCountOfCurrentWordTV.setText("");
+        imageView.setImageResource(R.mipmap.g0);
     }
 
 
@@ -281,10 +289,11 @@ public class MainActivity extends ActionBarActivity {
             if (isValidated) {
                 if (hangManGame.guessWord(guessChar)) {
                     isCurrentFailed = hangManGame.isCurrentWordFailed();
+                    isCurrentFailed = hangManGame.isCurrentWordFailed();
                     isCurrentHit = hangManGame.isCurrentWordHit();
                     if (isCurrentFailed || isCurrentHit) {
                         lastWord = hangManGame.getWord();
-                        hangManGame.requestNewWord();
+//                        hangManGame.requestNewWord();
                     }
                 } else {
                     isServerError = true;
@@ -311,6 +320,52 @@ public class MainActivity extends ActionBarActivity {
             } else {
                 currentWordTV.setText(hangManGame.getWord());
                 wrongGuessCountOfCurrentWordTV.setText(String.valueOf(hangManGame.getWrongGuessCountOfCurrentWord()));
+                updateImageByWrongCount(hangManGame.getWrongGuessCountOfCurrentWord());
+            }
+        }
+
+        /**
+         * updateImageByWrongCount
+         *
+         * @param wrongCount
+         */
+        void updateImageByWrongCount(int wrongCount) {
+            switch (wrongCount) {
+                case 0:
+                    imageView.setImageResource(R.mipmap.g0);
+                    break;
+                case 1:
+                    imageView.setImageResource(R.mipmap.g1);
+                    break;
+                case 2:
+                    imageView.setImageResource(R.mipmap.g2);
+                    break;
+                case 3:
+                    imageView.setImageResource(R.mipmap.g3);
+                    break;
+                case 4:
+                    imageView.setImageResource(R.mipmap.g4);
+                    break;
+                case 5:
+                    imageView.setImageResource(R.mipmap.g5);
+                    break;
+                case 6:
+                    imageView.setImageResource(R.mipmap.g6);
+                    break;
+                case 7:
+                    imageView.setImageResource(R.mipmap.g7);
+                    break;
+                case 8:
+                    imageView.setImageResource(R.mipmap.g8);
+                    break;
+                case 9:
+                    imageView.setImageResource(R.mipmap.g9);
+                    break;
+                case 10:
+                    imageView.setImageResource(R.mipmap.g10);
+                    break;
+                default:
+                    //error
             }
         }
     }
