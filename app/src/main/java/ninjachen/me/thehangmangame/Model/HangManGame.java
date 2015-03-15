@@ -6,6 +6,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ninjachen.me.thehangmangame.utils.HttpUtils;
@@ -22,15 +23,18 @@ public class HangManGame {
     public final int NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD;
 
     String sessionId;
-    String score;
+    int score = 0;
     //word - gives you the word you need to guess.
     String word;
     //totalWordCount - tells you the number of words that you have tried.
-    int totalWordCount;
-    //wrongGuessCountOfCurrentWord - tells you the number of wrong guess you already made on this word.
-    int wrongGuessCountOfCurrentWord;
+    int totalWordCount = 0;
 
-    List<Character> guessedLetters;
+
+    int correctWordCount = 0;
+    //wrongGuessCountOfCurrentWord - tells you the number of wrong guess you already made on this word.
+    int wrongGuessCountOfCurrentWord = 0;
+
+    List<String> guessedLetters = new ArrayList<>();
 
     //should not be invoked
     private HangManGame() {
@@ -71,8 +75,13 @@ public class HangManGame {
         return null;
     }
 
-    //expected like: {"sessionId":"3f0421bb5cb56631c170a35da90161d2","data":{"word":"*****","totalWordCount":1,"wrongGuessCountOfCurrentWord":0}}
-    public boolean requestNewWord(){
+    /**
+     * requestNewWord
+     * expected response like: {"sessionId":"3f0421bb5cb56631c170a35da90161d2","data":{"word":"*****","totalWordCount":1,"wrongGuessCountOfCurrentWord":0}}
+     *
+     * @return
+     */
+    public boolean requestNewWord() {
         try {
             JSONObject requestParams = new JSONObject();
             requestParams.put("sessionId", sessionId);
@@ -90,10 +99,16 @@ public class HangManGame {
         return false;
     }
 
-    //todo
-    //expected like: {"sessionId":"3f0421bb5cb56631c170a35da90161d2","data":{"word":"*****","totalWordCount":1,"wrongGuessCountOfCurrentWord":0}}
-    public boolean guessWord(String guessChar){
+    /**
+     * guessWord
+     * expected response like: {"sessionId":"3f0421bb5cb56631c170a35da90161d2","data":{"word":"*****","totalWordCount":1,"wrongGuessCountOfCurrentWord":0}}
+     *
+     * @param guessChar
+     * @return
+     */
+    public boolean guessWord(String guessChar) {
         try {
+            getGuessedLetters().add(guessChar);
             JSONObject requestParams = new JSONObject();
             requestParams.put("sessionId", sessionId);
             requestParams.put("action", "guessWord");
@@ -107,9 +122,60 @@ public class HangManGame {
             return true;
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
         return false;
     }
+
+    /**
+     * request score from server
+     *
+     * @return responseStr; if fail, return null
+     */
+    public String requestScore() {
+        try {
+            JSONObject requestParams = new JSONObject();
+            requestParams.put("sessionId", sessionId);
+            requestParams.put("action", "getResult");
+            String response = HttpUtils.callInHTTPPost(REQUEST_URL, requestParams);
+            JSONObject jsonObject = new JSONObject(response);
+            JSONObject data = jsonObject.getJSONObject("data");
+            setTotalWordCount(data.getInt("totalWordCount"));
+            setCorrectWordCount(data.getInt("correctWordCount"));
+            setTotalWordCount(data.getInt("totalWrongGuessCount"));
+            setScore(data.getInt("score"));
+            return response;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * get submit score
+     *
+     * @return message; if fail, return null
+     */
+    public String submitScore() {
+        try {
+            JSONObject requestParams = new JSONObject();
+            requestParams.put("sessionId", sessionId);
+            requestParams.put("action", "submitResult");
+            String response = HttpUtils.callInHTTPPost(REQUEST_URL, requestParams);
+            JSONObject jsonObject = new JSONObject(response);
+            String message = jsonObject.getString("message");
+            return message;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public String getSessionId() {
         return sessionId;
@@ -119,19 +185,19 @@ public class HangManGame {
         this.sessionId = sessionId;
     }
 
-    public String getScore() {
+    public int getScore() {
         return score;
     }
 
-    public void setScore(String score) {
+    public void setScore(int score) {
         this.score = score;
     }
 
-    public List<Character> getGuessedLetters() {
+    public List<String> getGuessedLetters() {
         return guessedLetters;
     }
 
-    public void setGuessedLetters(List<Character> guessedLetters) {
+    public void setGuessedLetters(List<String> guessedLetters) {
         this.guessedLetters = guessedLetters;
     }
 
@@ -149,6 +215,14 @@ public class HangManGame {
 
     public void setTotalWordCount(int totalWordCount) {
         this.totalWordCount = totalWordCount;
+    }
+
+    public int getCorrectWordCount() {
+        return correctWordCount;
+    }
+
+    public void setCorrectWordCount(int correctWordCount) {
+        this.correctWordCount = correctWordCount;
     }
 
     public int getWrongGuessCountOfCurrentWord() {
@@ -177,17 +251,29 @@ public class HangManGame {
 
     /**
      * is current word failed
+     *
      * @return
      */
     public boolean isCurrentWordFailed() {
-        return getWrongGuessCountOfCurrentWord() > NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD;
+        return getWrongGuessCountOfCurrentWord() >= NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD;
     }
 
     /**
      * is current word hited
+     *
      * @return
      */
     public boolean isCurrentWordHit() {
         return getWord().indexOf("*") < 0;
     }
+
+    public boolean isHitMaxWordCount() {
+        return getTotalWordCount() >= NUMBER_OF_WORDS_TO_GUESS;
+    }
+
+    public void clearWord() {
+        setWord("");
+        setWrongGuessCountOfCurrentWord(0);
+    }
+
 }

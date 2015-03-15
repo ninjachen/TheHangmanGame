@@ -102,16 +102,19 @@ public class HttpUtils {
         httppost.addHeader("Content-Type", "application/json");
 //        httppost.addHeader("User-Agent", "imgfornote");
         try {
-            if (params != null && params.length() > 0)
+            if (params != null && params.length() > 0){
+                Log.d(TAG, "invoke a HTTP-POST : " + params.toString());
                 httppost.setEntity(new StringEntity(params.toString()));
+            }
             // Execute HTTP Post Request
             HttpResponse response = httpclient.execute(httppost, localContext);
-            Log.i(TAG, "response bode : " + inputStreamToString(response.getEntity().getContent()).toString());
+            String responStr = inputStreamToString(response.getEntity().getContent()).toString();
+            Log.d(TAG, "response code: " + response.getStatusLine().getStatusCode() + "; response body : " + responStr);
             if (isResponseOK(response)) {
                 //request OK
-                return inputStreamToString(response.getEntity().getContent()).toString();
+                return responStr;
             } else {
-                Log.e(TAG, String.format("callInHTTPPost run into error, error code is %dw", response.getStatusLine().getStatusCode()));
+                Log.e(TAG, String.format("callInHTTPPost run into error, error code is %d", response.getStatusLine().getStatusCode()));
             }
         } catch (IOException e) {
             e.printStackTrace();

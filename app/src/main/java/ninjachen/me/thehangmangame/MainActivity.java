@@ -3,7 +3,6 @@ package ninjachen.me.thehangmangame;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,19 +25,28 @@ public class MainActivity extends ActionBarActivity {
     private String TAG = MainActivity.class.getSimpleName();
 
     @InjectView(R.id.score)
-    TextView score;
+    TextView scoreTV;
 
     @InjectView(R.id.currentWord)
-    TextView currentWord;
+    TextView currentWordTV;
+
+    @InjectView(R.id.wrongGuessCountOfCurrentWord)
+    TextView wrongGuessCountOfCurrentWordTV;
 
     @InjectView(R.id.guessLetter)
-    EditText guessLetter;
+    EditText guessLetterET;
 
     @InjectView(R.id.start)
-    Button start;
+    Button startBTN;
 
     @InjectView(R.id.guess)
-    Button guess;
+    Button guessBTN;
+
+    @InjectView(R.id.getScore)
+    Button getScoreBTN;
+
+    @InjectView(R.id.submitScore)
+    Button submitScoreBTN;
 
     HangManGame hangManGame;
 
@@ -48,18 +56,48 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (hangManGame == null)
+            startNewGame();
+    }
+
+    @OnClick(R.id.start)
+    public void startNewGame() {
         StartGameTask startGameTask = new StartGameTask();
         startGameTask.execute(HangManGame.PLAYER_ID);
     }
 
+    @OnClick(R.id.nextWord)
+    public void nextWord() {
+        NextWordTask nextWordTask = new NextWordTask();
+        nextWordTask.execute();
+    }
+
+    @OnClick(R.id.getScore)
+    public void getScore() {
+        GetScoreTask getScoreTask = new GetScoreTask();
+        getScoreTask.execute();
+    }
+
+    @OnClick(R.id.submitScore)
+    public void submitScore() {
+        SubmitScoreTask submitScoreTask = new SubmitScoreTask();
+        submitScoreTask.execute();
+    }
+
+
     @OnClick(R.id.guess)
     public void guess() {
         if (hangManGame == null) {
-            Toast.makeText(this, "服务器还没准备妥当，请稍等片刻。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.wait_for_the_game_init), Toast.LENGTH_LONG).show();
         }
         GuessWordTask guessWordTask = new GuessWordTask();
-        //todo
-        String guessWord = "";
+        String guessWord = guessLetterET.getText().toString().toUpperCase();
         guessWordTask.execute(guessWord);
     }
 
@@ -79,10 +117,19 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menuStartGame) {
+            startNewGame();
+            return true;
+        }else if(id == R.id.menuNextWord){
+            nextWord();
+            return true;
+        }else if(id == R.id.menuGetMyScore){
+            getScore();
+            return true;
+        }else if(id == R.id.menuSubmitScore){
+            submitScore();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -94,23 +141,32 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected String doInBackground(String... params) {
+            String result = null;
             try {
                 String playId = params[0];
                 JSONObject requestParams = new JSONObject();
                 requestParams.put("playerId", playId);
                 requestParams.put("action", "startGame");
-
-                String result = HttpUtils.callInHTTPPost(HangManGame.REQUEST_URL, requestParams);
-                if (result == null) {
-                    Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
-                } else {
+                result = HttpUtils.callInHTTPPost(HangManGame.REQUEST_URL, requestParams);
+                if (result != null) {
                     hangManGame = HangManGame.instance(result);
+                    hangManGame.requestNewWord();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.e(TAG, e.getMessage());
             }
-            return null;
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if (result == null)
+                Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
+
+            currentWordTV.setText(hangManGame.getWord());
+            wrongGuessCountOfCurrentWordTV.setText(String.valueOf(hangManGame.getWrongGuessCountOfCurrentWord()));
         }
     }
 
@@ -119,17 +175,23 @@ public class MainActivity extends ActionBarActivity {
      * post word to server ,and show the result
      */
     public class NextWordTask extends AsyncTask<String, Void, String> {
+        boolean isHitMaxWordCount = false;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            hangManGame.clearWord();
+            clearWord();
         }
 
         @Override
         protected String doInBackground(String... params) {
-            String guessWord = params[0];
+            isHitMaxWordCount = hangManGame.isHitMaxWordCount();
+            if (isHitMaxWordCount) {
+                return null;
+            }
             boolean isRequestOK = hangManGame.requestNewWord();
-            if(isRequestOK)
+            if (isRequestOK)
                 return hangManGame.getWord();
             else
                 return null;
@@ -138,11 +200,60 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(String word) {
             super.onPostExecute(word);
-            if(word == null)
+            if (isHitMaxWordCount)
+                Toast.makeText(MainActivity.this, getString(R.string.hit_max_word_count), Toast.LENGTH_LONG).show();
+            if (word == null)
                 Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
             else
-                currentWord.setText(word);
+                currentWordTV.setText(word);
         }
+    }
+
+    /**
+     * get score
+     */
+    public class GetScoreTask extends AsyncTask<String, Void, String> {
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            return hangManGame.requestScore();
+        }
+
+        @Override
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
+            if (response == null) {
+                Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
+                Log.e(TAG, getString(R.string.server_error_message));
+            } else {
+                scoreTV.setText(hangManGame.getScore());
+            }
+        }
+    }
+
+    /**
+     * submit score
+     */
+    public class SubmitScoreTask extends AsyncTask<String, Void, String> {
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            String message = hangManGame.submitScore();
+            return message;
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            super.onPostExecute(message);
+            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void clearWord() {
+        currentWordTV.setText("");
+        wrongGuessCountOfCurrentWordTV.setText("");
     }
 
 
@@ -154,7 +265,9 @@ public class MainActivity extends ActionBarActivity {
         boolean isCurrentHit = false;
         boolean isCurrentFailed = false;
         boolean isInputInvalid = false;
+        boolean isServerError = false;
         String lastWord;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -163,16 +276,18 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected String doInBackground(String... params) {
             String guessChar = params[0];
-            //todo validate the word
             boolean isValidated = HangManGame.validateWord(guessChar);
             isInputInvalid = !isValidated;
             if (isValidated) {
-                hangManGame.guessWord(guessChar);
-                isCurrentFailed = hangManGame.isCurrentWordFailed();
-                isCurrentHit = hangManGame.isCurrentWordHit();
-                if(isCurrentFailed || isCurrentHit){
-                    lastWord = hangManGame.getWord();
-                    hangManGame.requestNewWord();
+                if (hangManGame.guessWord(guessChar)) {
+                    isCurrentFailed = hangManGame.isCurrentWordFailed();
+                    isCurrentHit = hangManGame.isCurrentWordHit();
+                    if (isCurrentFailed || isCurrentHit) {
+                        lastWord = hangManGame.getWord();
+                        hangManGame.requestNewWord();
+                    }
+                } else {
+                    isServerError = true;
                 }
             }
             return null;
@@ -181,16 +296,21 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if(isInputInvalid){
+            if (isServerError) {
+                Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
+                Log.i(TAG, getString(R.string.server_error_message));
+            } else if (isInputInvalid) {
                 Toast.makeText(MainActivity.this, "only CAPITAL letter is permitted", Toast.LENGTH_LONG).show();
-                Log.i(TAG, "only CAPITAL letter is permitted" + currentWord);
-            }else if(isCurrentFailed){
-                hangManGame.requestNewWord();
+                Log.i(TAG, "only CAPITAL letter is permitted" + currentWordTV);
+            } else if (isCurrentFailed) {
                 Toast.makeText(MainActivity.this, "word " + lastWord + "guess wrong", Toast.LENGTH_LONG).show();
-                Log.i(TAG,"word " + lastWord + "guess wrong");
-            }else if(isCurrentHit){
+                Log.i(TAG, "word " + lastWord + "guess wrong");
+            } else if (isCurrentHit) {
                 Toast.makeText(MainActivity.this, "word " + lastWord + " hit", Toast.LENGTH_LONG).show();
                 Log.i(TAG, "word " + lastWord + " hit");
+            } else {
+                currentWordTV.setText(hangManGame.getWord());
+                wrongGuessCountOfCurrentWordTV.setText(String.valueOf(hangManGame.getWrongGuessCountOfCurrentWord()));
             }
         }
     }

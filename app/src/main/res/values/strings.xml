@@ -2,7 +2,12 @@
     <string name="app_name">TheHangmanGame</string>
     <string name="guess_it">Guess it!</string>
     <string name="start_a_new_game">Start a new game!</string>
+    <string name="next_word">Next word!</string>
     <string name="server_error_message">The server says "He is ill"</string>
+    <string name="wait_for_the_game_init">wait_for_the_game_init</string>
+    <string name="hit_max_word_count">Hit max word count, please start a new game</string>
+    <string name="get_my_score">Get my score</string>
+    <string name="submit_score">Submit Score</string>
 
 
 </resources>
