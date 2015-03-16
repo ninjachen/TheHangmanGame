@@ -12,16 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <ImageView
             android:id="@+id/image"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/g0"/>
+            android:layout_gravity="center"
+            android:src="@mipmap/g0" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
 
             <!--<TextView
                 android:layout_width="wrap_content"
@@ -34,16 +36,18 @@
                 android:id="@+id/currentWord"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="30dp"
+                android:layout_marginLeft="24dp"
                 android:gravity="center"
                 android:text="waiting for GAME init..."
-                android:textSize="24sp" />
+                android:textColor="#999933"
+                android:textSize="26sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:paddingTop="30dp">
+                android:visibility="invisible"
+                >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -60,7 +64,8 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
             <EditText
                 android:id="@+id/guessLetter"
@@ -77,41 +82,247 @@
                 android:text="@string/guess_it" />`
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/guessLettersLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_margin">
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="A" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="B" />
+
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="C" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="D" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="E" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="F" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="G" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_margin">
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="H" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="I" />
+
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="J" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="K" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="L" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="M" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_margin">
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="O" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="P" />
+
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Q" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="R" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="S" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="T" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="U" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_margin">
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="V" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="W" />
+
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="X" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Y" />
+
+                <TextView
+                    style="@style/GuessLetterStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Z" />
+            </LinearLayout>
+
+        </LinearLayout>
 
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WrongGuessCount :" />
 
-            <TextView
-                android:id="@+id/wrongGuessCountOfCurrentWord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="/" />
+                android:layout_gravity="right|bottom">
 
-            <TextView
-                android:id="@+id/nummberOfGuessAllowedForEachWord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WrongGuess :" />
+
+                <TextView
+                    android:id="@+id/wrongGuessCountOfCurrentWord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/" />
+
+                <TextView
+                    android:id="@+id/nummberOfGuessAllowedForEachWord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+            </LinearLayout>
         </LinearLayout>
-
+        <Button
+            android:id="@+id/nextWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:visibility="gone"
+            android:text="@string/next_word" />
         <Button
             android:id="@+id/getScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/get_my_score"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/submitScore"
@@ -120,11 +331,6 @@
             android:text="@string/submit_score"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/nextWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/next_word" />
 
         <Button
             android:id="@+id/start"

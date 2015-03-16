@@ -1,11 +1,16 @@
 package ninjachen.me.thehangmangame;
 
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -55,6 +60,10 @@ public class MainActivity extends ActionBarActivity {
     @InjectView(R.id.image)
     ImageView imageView;
 
+    @InjectView(R.id.guessLettersLayout)
+    ViewGroup guessLettersLayout;
+
+    //the game core
     HangManGame hangManGame;
 
     @Override
@@ -62,8 +71,6 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
-
-
     }
 
     @Override
@@ -97,16 +104,34 @@ public class MainActivity extends ActionBarActivity {
         submitScoreTask.execute();
     }
 
-
-    @OnClick(R.id.guess)
-    public void guess() {
+//    @OnClick(R.id.guessLettersLayout)
+    public void guessLetter(View view){
         if (hangManGame == null) {
             Toast.makeText(this, getString(R.string.wait_for_the_game_init), Toast.LENGTH_LONG).show();
         }
-        GuessWordTask guessWordTask = new GuessWordTask();
-        String guessWord = guessLetterET.getText().toString().toUpperCase();
-        guessWordTask.execute(guessWord);
+        if(view instanceof TextView){
+            TextView textView = (TextView) view;
+            String letter = textView.getText().toString();
+            //add a EXCLUSIVE,and disable the textview
+            SpannableString spannableString = new SpannableString(letter);
+            spannableString.setSpan(new StrikethroughSpan(), 0, letter.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            textView.setText(spannableString);
+            textView. setEnabled(false);
+            GuessWordTask guessWordTask = new GuessWordTask();
+            guessWordTask.execute(letter);
+        }
     }
+
+//    @OnClick(R.id.guess)
+//    public void guess() {
+//        if (hangManGame == null) {
+//            Toast.makeText(this, getString(R.string.wait_for_the_game_init), Toast.LENGTH_LONG).show();
+//        }
+//        GuessWordTask guessWordTask = new GuessWordTask();
+//        String guessWord = guessLetterET.getText().toString().toUpperCase();
+//        guessWordTask.execute(guessWord);
+//    }
 
 
     @Override
@@ -188,7 +213,7 @@ public class MainActivity extends ActionBarActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             hangManGame.clearWord();
-            clearWord();
+            cleanup();
         }
 
         @Override
@@ -234,6 +259,7 @@ public class MainActivity extends ActionBarActivity {
                 Toast.makeText(MainActivity.this, getString(R.string.server_error_message), Toast.LENGTH_LONG).show();
                 Log.e(TAG, getString(R.string.server_error_message));
             } else {
+                ((View)scoreTV.getParent()).setVisibility(View.VISIBLE);
                 scoreTV.setText(String.valueOf(hangManGame.getScore()));
             }
         }
@@ -258,10 +284,27 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void clearWord() {
+    //cleanup the UI, after call the nextWord()
+    private void cleanup() {
+        ((View)scoreTV.getParent()).setVisibility(View.INVISIBLE);
         currentWordTV.setText("");
         wrongGuessCountOfCurrentWordTV.setText("");
         imageView.setImageResource(R.mipmap.g0);
+
+        int childCount = guessLettersLayout.getChildCount();
+        for(int i =0; i < childCount; i++){
+            View v = guessLettersLayout.getChildAt(i);
+            if(v instanceof ViewGroup){
+                for(int j=0; j< ((ViewGroup)v).getChildCount();j++){
+                    View letterView = ((ViewGroup)v).getChildAt(j);
+                    if(letterView instanceof TextView){
+                        TextView textView = (TextView) letterView;
+                        textView.setEnabled(true);
+                        textView.setText(textView.getText());
+                    }
+                }
+            }
+        }
     }
 
 
@@ -293,7 +336,6 @@ public class MainActivity extends ActionBarActivity {
                     isCurrentHit = hangManGame.isCurrentWordHit();
                     if (isCurrentFailed || isCurrentHit) {
                         lastWord = hangManGame.getWord();
-//                        hangManGame.requestNewWord();
                     }
                 } else {
                     isServerError = true;
@@ -301,6 +343,8 @@ public class MainActivity extends ActionBarActivity {
             }
             return null;
         }
+
+
 
         @Override
         protected void onPostExecute(String s) {
@@ -311,16 +355,17 @@ public class MainActivity extends ActionBarActivity {
             } else if (isInputInvalid) {
                 Toast.makeText(MainActivity.this, "only CAPITAL letter is permitted", Toast.LENGTH_LONG).show();
                 Log.i(TAG, "only CAPITAL letter is permitted" + currentWordTV);
-            } else if (isCurrentFailed) {
-                Toast.makeText(MainActivity.this, "word " + lastWord + "guess wrong", Toast.LENGTH_LONG).show();
-                Log.i(TAG, "word " + lastWord + "guess wrong");
-            } else if (isCurrentHit) {
-                Toast.makeText(MainActivity.this, "word " + lastWord + " hit", Toast.LENGTH_LONG).show();
-                Log.i(TAG, "word " + lastWord + " hit");
-            } else {
+            } else{
                 currentWordTV.setText(hangManGame.getWord());
                 wrongGuessCountOfCurrentWordTV.setText(String.valueOf(hangManGame.getWrongGuessCountOfCurrentWord()));
                 updateImageByWrongCount(hangManGame.getWrongGuessCountOfCurrentWord());
+                if (isCurrentFailed) {
+                    Toast.makeText(MainActivity.this, "word " + lastWord + "guess wrong", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "word " + lastWord + "guess wrong");
+                } else if (isCurrentHit) {
+                    Toast.makeText(MainActivity.this, "word " + lastWord + " hit", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "word " + lastWord + " hit");
+                }
             }
         }
 
