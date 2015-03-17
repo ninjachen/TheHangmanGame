@@ -300,7 +300,7 @@ public class MainActivity extends ActionBarActivity {
                     if(letterView instanceof TextView){
                         TextView textView = (TextView) letterView;
                         textView.setEnabled(true);
-                        textView.setText(textView.getText());
+                        textView.setText(new SpannableString(textView.getText().toString()));
                     }
                 }
             }
